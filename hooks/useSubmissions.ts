@@ -23,6 +23,7 @@ export interface ParsedSubmission {
   id: string;
   queueId: string;
   subjectMetadata?: Record<string, unknown>;
+  attachments?: { fileName: string }[];
   questions: {
     templateId: string;
     questionText: string;
@@ -201,11 +202,12 @@ export function useSubmissions(): UseSubmissionsReturn {
           queue_id: ps.queueId,
           labeling_task_id: 'uploaded',
           submitted_at: nowIso,
-          attachments: [],
+          attachments: ps.attachments ?? [],
           raw_json: {
             id: ps.id,
             queueId: ps.queueId,
             subjectMetadata: ps.subjectMetadata ?? null,
+            attachments: ps.attachments ?? [],
             questions: ps.questions,
           },
         }));
@@ -214,8 +216,10 @@ export function useSubmissions(): UseSubmissionsReturn {
           ps.questions.map((q) => ({
             submission_id: ps.id,
             template_id: q.templateId,
-            question_type: 'unknown',
-            question_text: q.questionText,
+            // Accept any question type as-is (stored as 'uploaded' for uploaded files)
+            question_type: 'uploaded',
+            // Handle empty question text gracefully
+            question_text: q.questionText || '',
             rev: 1,
           })),
         );
@@ -224,8 +228,9 @@ export function useSubmissions(): UseSubmissionsReturn {
           ps.questions.map((q) => ({
             submission_id: ps.id,
             template_id: q.templateId,
-            choice: q.answer,
-            reasoning: q.answerReasoning ?? null,
+            // Handle empty/missing answers gracefully - store empty string, not null
+            choice: q.answer || '',
+            reasoning: q.answerReasoning || null,
           })),
         );
 

@@ -48,7 +48,10 @@ interface QuestionInput {
 
 interface AnswerInput {
   choice?: unknown;
+  choices?: unknown;
   reasoning?: unknown;
+  freeformText?: unknown;
+  [key: string]: unknown;
 }
 
 interface AttachmentRefInput {
@@ -64,6 +67,46 @@ interface SubmissionInput {
   attachments?: unknown;
   questions?: QuestionInput[];
   answers?: Record<string, AnswerInput>;
+}
+
+/**
+ * Extracts an answer string from various answer shapes:
+ * - choice (string): direct answer
+ * - choices (string[]): array of choices, joined
+ * - freeformText (string): free-form text answer
+ * - Any unknown fields: gracefully ignored
+ * Returns empty string if no answer found
+ */
+function extractAnswerChoice(answer: AnswerInput | undefined): string {
+  if (!answer || typeof answer !== 'object') return '';
+
+  // Priority: choice > choices > freeformText
+  if (answer.choice !== undefined && answer.choice !== null) {
+    return String(answer.choice);
+  }
+  if (Array.isArray(answer.choices)) {
+    // Filter out non-string values and join
+    const validChoices = answer.choices
+      .filter((c): c is string => typeof c === 'string')
+      .join(', ');
+    return validChoices;
+  }
+  if (answer.freeformText !== undefined && answer.freeformText !== null) {
+    return String(answer.freeformText);
+  }
+
+  return '';
+}
+
+/**
+ * Extracts reasoning from answer, handling various shapes
+ */
+function extractReasoning(answer: AnswerInput | undefined): string {
+  if (!answer || typeof answer !== 'object') return '';
+  if (answer.reasoning !== undefined && answer.reasoning !== null) {
+    return String(answer.reasoning);
+  }
+  return '';
 }
 
 function validateSubmissions(data: unknown): ValidationResult {
@@ -93,9 +136,9 @@ function validateSubmissions(data: unknown): ValidationResult {
     if (!item.questions || !Array.isArray(item.questions)) {
       submissionErrors.push('questions (array)');
     }
-    if (!item.answers || typeof item.answers !== 'object' || item.answers === null) {
-      submissionErrors.push('answers (object)');
-    }
+    // answers is optional - if missing, we'll just use empty answers
+    // Don't reject if answers is missing or null
+    const hasAnswers = item.answers && typeof item.answers === 'object' && item.answers !== null;
 
     if (submissionErrors.length > 0) {
       errors.push(`Submission ${index + 1}: Missing or invalid fields: ${submissionErrors.join(', ')}`);
@@ -104,7 +147,7 @@ function validateSubmissions(data: unknown): ValidationResult {
 
     // Validate questions and map to ParsedSubmission format
     const validQuestions: ParsedSubmission['questions'] = [];
-    const answers = item.answers as Record<string, AnswerInput>;
+    const answers = hasAnswers ? (item.answers as Record<string, AnswerInput>) : {};
     const subjectMetadata =
       item.subjectMetadata && typeof item.subjectMetadata === 'object'
         ? (item.subjectMetadata as Record<string, unknown>)
@@ -129,9 +172,8 @@ function validateSubmissions(data: unknown): ValidationResult {
         if (!q.data.id || typeof q.data.id !== 'string') {
           questionErrors.push('data.id');
         }
-        if (!q.data.questionText || typeof q.data.questionText !== 'string') {
-          questionErrors.push('data.questionText');
-        }
+        // questionText is optional - use empty string if missing
+        // questionType is accepted as-is, not validated/rejected
       }
 
       if (questionErrors.length > 0) {
@@ -139,13 +181,17 @@ function validateSubmissions(data: unknown): ValidationResult {
       } else {
         const templateId = q.data!.id as string;
         const answer = answers[templateId];
+        const questionText = q.data!.questionText 
+          ? String(q.data!.questionText) 
+          : '';
         
         // Transform to ParsedSubmission format
+        // Handle all answer shapes gracefully - no crash if answer is missing
         validQuestions.push({
           templateId,
-          questionText: q.data!.questionText as string,
-          answer: answer?.choice ? String(answer.choice) : '',
-          answerReasoning: answer?.reasoning ? String(answer.reasoning) : undefined,
+          questionText,
+          answer: extractAnswerChoice(answer),
+          answerReasoning: extractReasoning(answer) || undefined,
         });
       }
     });
