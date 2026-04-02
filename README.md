@@ -6,7 +6,7 @@ AI Judge is a full-stack evaluation platform for annotation queues. Users import
 The app persists operational state in Supabase and executes provider calls through a server-side API route for safer key handling and centralized error control.
 
 ## Live Demo
-https://your-vercel-url.vercel.app
+https://v0-besimplejudge.vercel.app/submissions
 
 Go to Settings → enter your LLM API keys → upload submissions → start evaluating.
 
