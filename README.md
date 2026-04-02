@@ -66,7 +66,7 @@ Real-time run progress panel
 Attachment upload + multimodal forwarding path
 
 **Time Spent**
-7 hours
+5 hours
 
 
 
