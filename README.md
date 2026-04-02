@@ -40,6 +40,12 @@ shadcn/ui + Tailwind: rapid feature delivery with consistent primitives, good da
 - Client-side filtering/sorting on Results: simpler UX and implementation for moderate data size; large-scale workloads should move filtering/pagination server-side.
 - Attachment handling: current model stores attachment metadata in submissions.attachments JSONB for implementation speed; dedicated relational attachment tables can improve querying/governance.
 - Retry/timeout tuning: conservative defaults favor reliability and cost control over maximum throughput.
+- - UI/UX consistency: Some UI elements (e.g., judge assignment drawer) could benefit 
+  from further polish. Priority was placed on functional completeness over 
+  pixel-perfect uniformity.
+- Component size: Most components are small and focused with shared primitives. 
+  A few view-level components remain larger than ideal due to complex interaction 
+  flows — would benefit from further decomposition in production.
 
 
 **Bonus Features Implemented**
