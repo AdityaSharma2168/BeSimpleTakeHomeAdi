@@ -5,6 +5,11 @@
 AI Judge is a full-stack evaluation platform for annotation queues. Users import submissions, create AI judges (rubrics + models), assign judges to question templates, run real LLM evaluations, and review results with filters, statistics, and charts.  
 The app persists operational state in Supabase and executes provider calls through a server-side API route for safer key handling and centralized error control.
 
+## Live Demo
+https://your-vercel-url.vercel.app
+
+Go to Settings → enter your LLM API keys → upload submissions → start evaluating.
+
 ## Tech Stack
 
 - Frontend: React 19 + TypeScript + Tailwind + shadcn/ui
@@ -36,24 +41,7 @@ shadcn/ui + Tailwind: rapid feature delivery with consistent primitives, good da
 - Attachment handling: current model stores attachment metadata in submissions.attachments JSONB for implementation speed; dedicated relational attachment tables can improve querying/governance.
 - Retry/timeout tuning: conservative defaults favor reliability and cost control over maximum throughput.
 
-**Scalability Notes**
 
-**What scales well now:**
-  Task fan-out model with bounded concurrency.
-  Durable persistence of evaluation rows and attachment metadata.
-  Provider integration isolated to a single API route.
-
-**Known scaling limits**
-  Results page filtering is memory-bound on the client at very high row counts.
-  Single-route orchestration can become a hotspot under heavy concurrent runs.
-  Attachment fetch/parse in request path increases API latency for large files.
-
-**Production-oriented next steps**
-  Move run orchestration to background jobs/queues.
-  Add server-side pagination/filtering and aggregate endpoints.
-  Add caching for repeated attachment reads and pre-extracted document text.
-  Enforce auth and scoped RLS, plus per-workspace quotas/rate limits.
-  
 **Bonus Features Implemented**
 Animated charts in Results
 Prompt field selector (question/answer/metadata inclusion)
