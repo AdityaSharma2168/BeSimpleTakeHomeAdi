@@ -63,7 +63,7 @@ Go to Settings → enter your LLM API keys → upload submissions → start eval
 
 ## Time Spent
 
-~10–12 hours
+5 hours
 
 ## Setup
 
