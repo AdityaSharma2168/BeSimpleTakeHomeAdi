@@ -8,7 +8,7 @@ The app persists operational state in Supabase and executes provider calls throu
 ## Tech Stack
 
 - Frontend: React 19 + TypeScript + Tailwind + shadcn/ui
-- Runtime: Next.js (App Router shell) + React Router UI routing
+- Runtime: Next.js (App Router shell)
 - Backend: Supabase Postgres + Storage + RLS policies
 - LLMs/APIs: OpenAI/OpenVision + Anthropic (+ optional Google path)
 - Validation + reliability: Zod, typed hooks, retry/backoff logic, timeout guards
@@ -31,10 +31,10 @@ Hook-driven data orchestration: logic lives in useSubmissions, useJudges, useEva
 shadcn/ui + Tailwind: rapid feature delivery with consistent primitives, good dark-mode ergonomics, and low styling overhead.
 
 **Trade-offs:**
-No auth (intentional for take-home scope): RLS is permissive for speed; production would require auth-based policies and per-tenant isolation.
-Client-side filtering/sorting on Results: simpler UX and implementation for moderate data size; large-scale workloads should move filtering/pagination server-side.
-Attachment handling: current model stores attachment metadata in submissions.attachments JSONB for implementation speed; dedicated relational attachment tables can improve querying/governance.
-Retry/timeout tuning: conservative defaults favor reliability and cost control over maximum throughput.
+- No auth (intentional for take-home scope): RLS is permissive for speed; production would require auth-based policies and per-tenant isolation.
+- Client-side filtering/sorting on Results: simpler UX and implementation for moderate data size; large-scale workloads should move filtering/pagination server-side.
+- Attachment handling: current model stores attachment metadata in submissions.attachments JSONB for implementation speed; dedicated relational attachment tables can improve querying/governance.
+- Retry/timeout tuning: conservative defaults favor reliability and cost control over maximum throughput.
 
 **Scalability Notes**
 
